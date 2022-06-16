@@ -1,0 +1,12 @@
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata: 
+ name: csr-for-deepa
+spec: 
+ groups: 
+ - "system:authenticated"
+ usages: 
+ - client auth
+ - digital signature
+ - key encipherment
+ signerName: kubernetes.io/kube-apiserver-client

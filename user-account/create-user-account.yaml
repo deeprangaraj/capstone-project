@@ -1,0 +1,184 @@
+- hosts: "masters"
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+  become_user: root
+  gather_facts: yes
+  connection: ssh
+
+  tasks:
+     - name: Create user account with create, list, get, update, and delete pods in k8
+       shell: |
+               #kubectl apply -f create-namespace.yaml
+               kubectl create namespace capstone --dry-run=client -o yaml | kubectl apply -f -
+
+     - name: Create a directory deepa
+       ansible.builtin.file:
+         state: "{{ item }}"
+         path: $HOME/deepa
+         mode: '0755'
+       with_items:
+         - absent
+         - directory
+
+     - name: chdir into deepa folder
+       ansible.builtin.shell: ls
+       args:
+         chdir: $HOME/deepa
+
+     - name: Generate private key, csr and sign the certificate in deepa folder
+       shell: |
+               openssl genrsa -out $HOME/deepa/deepa.key 2048
+       register: output
+     - debug: var=output
+
+     - name: Generate private key, csr and sign the certificate in deepa folder
+       shell: |
+         openssl req -new -key $HOME/deepa/deepa.key -out $HOME/deepa/deepa.csr -subj "/CN=deepa/O=capstone"
+       register: output
+     - debug: var=output
+
+     - name: Copy all yaml files
+       ansible.builtin.copy:
+         src: "{{ item }}"
+         dest: $HOME/deepa
+         mode: '0644'
+       with_items:
+         - create-csr-deepa.yaml
+         - create-role-binding.yaml
+         - create-role.yaml
+
+     - name: Get csr in base64
+       shell: |
+          cat $HOME/deepa/deepa.csr | base64 -w 0 > $HOME/deepa/tmp.txt
+       register: output
+     - debug: var=output
+
+     - name: Append base64 to create-csr-deepa.yaml
+       shell: |
+          echo " request: $(cat $HOME/deepa/tmp.txt)" >> $HOME/deepa/create-csr-deepa.yaml
+       register: output
+     - debug: var=output
+
+     - name: Apply create-csr-deepa.yaml
+       shell: |
+          kubectl apply -f $HOME/deepa/create-csr-deepa.yaml
+       register: output
+     - debug: var=output
+
+     - name: Approve certificate
+       shell: |
+         kubectl certificate approve csr-for-deepa
+       register: output
+     - debug: var=output
+
+     - name: Generate crt
+       shell: |
+         kubectl get csr csr-for-deepa -o jsonpath='{.status.certificate}' | base64 --decode > $HOME/deepa/deepa.crt
+       register: output
+     - debug: var=output
+
+     - name: Set user credentials
+       shell: |
+         kubectl config set-credentials deepa-cred --client-certificate $HOME/deepa/deepa.csr --client-key $HOME/deepa/deepa.key
+       register: output
+     - debug: var=output
+
+     - name: Set context
+       shell: |
+         kubectl config set-context deepa@kubernetes --user deepa --cluster kubernetes --namespace capstone
+       register: output
+     - debug: var=output
+
+     - name: Create role for user
+       shell: |
+         kubectl apply -f $HOME/deepa/create-role.yaml
+       register: output
+     - debug: var=output
+
+     - name: Create user and role binding
+       shell: |
+         kubectl apply -f $HOME/deepa/create-role-binding.yaml
+       register: output
+     - debug: var=output
+
+     - name: Test for create pod in capstone ns
+       shell: |
+         kubectl auth can-i create pods --namespace capstone  --as deepa
+       ignore_errors: True
+       register: output
+     - debug: var=output
+
+     - name: Test for delete pod in capstone ns
+       shell: |
+         kubectl auth can-i delete pods --namespace capstone  --as deepa
+       ignore_errors: True
+       register: output
+     - debug: var=output
+
+     - name: Test for list pod in capstone ns
+       shell: |
+         kubectl auth can-i list pods --namespace capstone  --as deepa
+       ignore_errors: True
+       register: output
+     - debug: var=output
+
+     - name: Test for get pod in capstone ns
+       shell: |
+         kubectl auth can-i get pods --namespace capstone  --as deepa
+       ignore_errors: True
+       register: output
+     - debug: var=output
+
+     - name: Test for update pod in capstone ns
+       shell: |
+         kubectl auth can-i update pods --namespace capstone  --as deepa
+       ignore_errors: True
+       register: output
+     - debug: var=output
+
+     - name: Test for get pod in default ns
+       shell: |
+         kubectl auth can-i get pods --as deepa
+       ignore_errors: True
+       register: output
+     - debug: var=output
+
+
+
+
+
+
+################################################################################################
+#
+#     - name: Copy create-csr-deepa.yaml
+#       shell: |
+#               OUTPUT=`cat $HOME/deepa/deepa.csr | base64 -w 0`
+#               echo " request: $OUTPUT" >> $HOME/deepa/create-csr-deepa.yaml
+#               kubectl apply -f $HOME/deepa/create-csr-deepa.yaml
+#               kubectl certificate approve csr-for-deepa
+#               kubectl get csr csr-for-deepa -o jsonpath='{.status.certificate}' | base64 --decode > $HOME/deepa/deepa.crt
+#               kubectl config set-credentials deepa --client-certificate $HOME/deepa/deepa.csr --client-key $HOME/deepa/deepa.key
+#               kubectl config set-context deepa@kubernetes --user deepa --cluster kubernetes
+#               kubectl config use-context deepa@kubernetes
+#               kubectl get pods
+#       register: output
+#
+#     - debug: var=output
+
+
+#     - name: create role and role binding
+#       shell: |
+#               kubectl apply -f create-role.yaml
+#               kubectl apply -f create-role-binding.yaml
+#
+#     - name: Set credentials for the config file and create context
+#       shell: |
+#               kubectl config set-credentials deepa --client-certificate=$HOME/deepa/deepa.csr --client-key=$HOME/deepa/deepa.key
+#               kubectl config set-context deepa-context --cluster=kubernetes --namespace=capstone --user=deepa
+
+
+#     - command: "{{ item }} chdir=$HOME/deepa"
+#       with_items:
+#         - OUTOUT=`cat $HOME/deepa/deepa.csr | base64 -w 0`
+#         - echo " request: $OUTPUT" >> $HOME/deepa/create-csr-deepa.yaml
