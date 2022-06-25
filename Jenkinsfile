@@ -3,7 +3,7 @@ pipeline {
     agent { label 'jenkins-worker' }
 
     tools {
-       maven '3.8.6'
+       maven "M3"
     }
  
     stages {
