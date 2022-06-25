@@ -10,8 +10,8 @@ pipeline {
 
         stage('Checkout external proj') {
            steps {
-             git branch: 'master',
-                credentialsId: 'cb067715-9f4b-4f93-93ff-d4fa802a8c71',
+             git branch: 'main',
+                credentialsId: '701898e5-0bf4-44a6-827f-37c85a090b1f',
                 url: 'https://github.com/deeprangaraj/SampleWebApp'
              sh "ls -la"
            }
