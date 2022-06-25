@@ -12,7 +12,7 @@ pipeline {
            steps {
              git branch: 'main',
                 credentialsId: '701898e5-0bf4-44a6-827f-37c85a090b1f',
-                url: 'https://github.com/deeprangaraj/SampleWebApp'
+                url: 'https://github.com/deeprangaraj/capstone-project.git'
              sh "ls -la"
            }
         }
