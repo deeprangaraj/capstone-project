@@ -1,6 +1,7 @@
 [masters]
-master ansible_host=ec2-3-16-104-210.us-east-2.compute.amazonaws.com ansible_user=ubuntu
+jenkins-master ansible_host=ec2-3-16-213-6.us-east-2.compute.amazonaws.com ansible_user=ubuntu
 
 [workers]
-worker1 ansible_host=ec2-3-132-71-141.us-east-2.compute.amazonaws.com ansible_user=ubuntu
-worker2 ansible_host=ec2-18-219-211-108.us-east-2.compute.amazonaws.com ansible_user=ubuntu
+jenkins-worker0 ansible_host=ec2-3-16-31-222.us-east-2.compute.amazonaws.com  ansible_user=ubuntu
+jenkins-worker1 ansible_host=ec2-13-58-102-242.us-east-2.compute.amazonaws.com ansible_user=ubuntu
+
