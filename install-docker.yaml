@@ -107,3 +107,9 @@
     register: Uptime
 
   - debug: var=Uptime
+
+
+#
+# ansible-playbook -i ansible-hosts.yaml install-docker.yaml  
+#
+#

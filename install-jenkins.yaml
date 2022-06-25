@@ -51,3 +51,7 @@
       service: name=jenkins state=started
       become: true
 
+
+#
+# ansible-playbook -i ansible-hosts.yaml install-jenkins.yaml 
+#
