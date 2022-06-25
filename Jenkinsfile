@@ -1,6 +1,6 @@
 pipeline {
     
-    agent { label 'jenkins-worker' }
+    agent { label 'workers' }
 
     tools {
        maven "M3"
