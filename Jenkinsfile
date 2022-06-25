@@ -38,7 +38,7 @@ pipeline {
         
         stage('Run Container on Dev Server') {
             steps {
-                sh 'docker run -p 8080:8080 -d --name sample-web-app-3 deepapraj/sample-app'
+                sh 'docker run -p 8080:8080 -d --name sample-web-app deepapraj/sample-app'
             }
         }
 
