@@ -63,9 +63,10 @@ pipeline {
         {
             steps {
                 sh 'docker kill sample-web-app' 
-                sh 'docker remove image deepapraj/sample-app --force'
+                sh 'docker image remove deepapraj/sample-app --force'
+                sh 'docker container stop sample-web-app'
+                sh 'docker container rm sample-web-app'
             }
         }
-
     }
 }
